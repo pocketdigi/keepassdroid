@@ -33,14 +33,17 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 public class RecentFileHistory {
 
     private static String DB_KEY = "recent_databases";
     private static String KEYFILE_KEY = "recent_keyfiles";
+    private static String PWD_KEY = "recent_pwd";
 
     private List<String> databases = new ArrayList<String>();
     private List<String> keyfiles = new ArrayList<String>();
+    private List<String> passwords = new ArrayList<String>();
     private Context ctx;
     private SharedPreferences prefs;
     private OnSharedPreferenceChangeListener listner;
@@ -85,6 +88,7 @@ public class RecentFileHistory {
 
             databases.clear();
             keyfiles.clear();
+            passwords.clear();
 
             FileDbHelper helper = new FileDbHelper(ctx);
             helper.open();
@@ -92,14 +96,17 @@ public class RecentFileHistory {
 
             int dbIndex = cursor.getColumnIndex(FileDbHelper.KEY_FILE_FILENAME);
             int keyIndex = cursor.getColumnIndex(FileDbHelper.KEY_FILE_KEYFILE);
+            int passwordIndex = cursor.getColumnIndex(FileDbHelper.KEY_FILE_PASSWORD);
 
             if(cursor.moveToFirst()) {
                 while (cursor.moveToNext()) {
                     String filename = cursor.getString(dbIndex);
                     String keyfile = cursor.getString(keyIndex);
+                    String password = cursor.getString(passwordIndex);
 
                     databases.add(filename);
                     keyfiles.add(keyfile);
+                    passwords.add(password);
                 }
             }
 
@@ -126,7 +133,7 @@ public class RecentFileHistory {
         return db.exists();
     }
 
-    public void createFile(Uri uri, Uri keyUri) {
+    public void createFile(Uri uri, Uri keyUri,String password) {
         if (!enabled || uri == null) return;
 
         init();
@@ -138,6 +145,11 @@ public class RecentFileHistory {
 
         String key = (keyUri == null) ? "" : keyUri.toString();
         keyfiles.add(0, key);
+
+        if(password==null) {
+            password="";
+        }
+        passwords.add(0, password);
 
         trimLists();
         savePrefs();
@@ -161,14 +173,21 @@ public class RecentFileHistory {
         return keyfiles.get(i);
     }
 
+    public String getPasswordAt(int i) {
+        init();
+        return passwords.get(i);
+    }
+
     private void loadPrefs() {
         loadList(databases, DB_KEY);
         loadList(keyfiles, KEYFILE_KEY);
+        loadList(passwords, PWD_KEY);
     }
 
     private void savePrefs() {
         saveList(DB_KEY, databases);
         saveList(KEYFILE_KEY, keyfiles);
+        saveList(PWD_KEY, passwords);
     }
 
     private void loadList(List<String> list, String keyprefix) {
@@ -208,6 +227,7 @@ public class RecentFileHistory {
             if (uriName.equals(entry) || fileName.equals(entry)) {
                 databases.remove(i);
                 keyfiles.remove(i);
+                passwords.remove(i);
                 break;
             }
         }
@@ -223,7 +243,7 @@ public class RecentFileHistory {
         return databases;
     }
 
-    public Uri getFileByName(Uri database) {
+    public Uri getKeyFileByName(Uri database) {
         if (!enabled) return null;
 
         init();
@@ -237,12 +257,28 @@ public class RecentFileHistory {
 
         return null;
     }
+    public String getPasswordByName(Uri database) {
+        if (!enabled) return null;
+        init();
+
+        int size = databases.size();
+        for (int i = 0; i < size; i++) {
+            if (UriUtil.equalsDefaultfile(database,databases.get(i))) {
+                return passwords.get(i);
+            }
+        }
+
+        return null;
+    }
+
+
 
     public void deleteAll() {
         init();
 
         databases.clear();
         keyfiles.clear();
+        passwords.clear();
 
         savePrefs();
     }
@@ -251,10 +287,11 @@ public class RecentFileHistory {
         init();
 
         keyfiles.clear();
-
+        passwords.clear();
         int size = databases.size();
         for (int i = 0; i < size; i++) {
             keyfiles.add("");
+            passwords.add("");
         }
 
         savePrefs();
@@ -265,6 +302,7 @@ public class RecentFileHistory {
         for (int i = FileDbHelper.MAX_FILES; i < size; i++) {
             databases.remove(i);
             keyfiles.remove(i);
+            passwords.remove(i);
         }
     }
 }

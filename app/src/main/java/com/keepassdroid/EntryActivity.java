@@ -228,14 +228,23 @@ public class EntryActivity extends LockCloseHideActivity {
 
 	private Notification getNotification(String intentText, int descResId) {
 		String desc = getString(descResId);
-		Notification notify = new Notification(R.drawable.notify, desc, System.currentTimeMillis());
-		
+//		Notification notify = new Notification(R.drawable.notify, desc, System.currentTimeMillis());
+//
 		Intent intent = new Intent(intentText);
 		PendingIntent pending = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-		
-		notify.setLatestEventInfo(this, getString(R.string.app_name), desc, pending);
-		
-		return notify;
+//
+//		notify.setLatestEventInfo(this, getString(R.string.app_name), desc, pending);
+
+		Notification notification = new Notification.Builder(this)
+				.setAutoCancel(true)
+				.setContentTitle(getString(R.string.app_name))
+				.setContentText(desc)
+				.setContentIntent(pending)
+				.setSmallIcon(R.drawable.notify)
+				.setWhen(System.currentTimeMillis())
+				.build();
+
+		return notification;
 	}
 	
 	private String getDateTime(Date dt) {

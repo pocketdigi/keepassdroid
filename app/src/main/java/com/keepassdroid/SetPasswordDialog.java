@@ -42,7 +42,7 @@ public class SetPasswordDialog extends CancelDialog {
 	private byte[] masterKey;
 	private Uri mKeyfile;
 	private FileOnFinish mFinish;
-		
+	private String mPassword;
 	public SetPasswordDialog(Context context) {
 		super(context);
 	}
@@ -95,7 +95,7 @@ public class SetPasswordDialog extends CancelDialog {
 					return;
 					
 				}
-				
+				mPassword=pass;
 				SetPassword sp = new SetPassword(getContext(), App.getDB(), pass, keyfile, new AfterSave(mFinish, new Handler()));
 				final ProgressTask pt = new ProgressTask(getContext(), sp, R.string.saving_database);
 				boolean valid = sp.validatePassword(getContext(), new OnClickListener() {
@@ -139,6 +139,7 @@ public class SetPasswordDialog extends CancelDialog {
 			if ( mSuccess ) {
 				if ( mFinish != null ) {
 					mFinish.setFilename(mKeyfile);
+					mFinish.setPassword(mPassword);
 				}
 				dismiss();
 			} else {

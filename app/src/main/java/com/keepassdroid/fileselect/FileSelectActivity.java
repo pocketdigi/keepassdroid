@@ -281,7 +281,7 @@ public class FileSelectActivity extends ListActivity {
 		public void run() {
 			if (mSuccess) {
 				// Add to recent files
-				fileHistory.createFile(mUri, getFilename());
+				fileHistory.createFile(mUri, getFilename(),getPassword());
 
 				GroupActivity.Launch(FileSelectActivity.this);
 			}
@@ -318,16 +318,18 @@ public class FileSelectActivity extends ListActivity {
 		new AsyncTask<Integer, Void, Void>() {
 			String fileName;
 			String keyFile;
+			String password;
 			protected Void doInBackground(Integer... args) {
 				int position = args[0];
 				fileName = fileHistory.getDatabaseAt(position);
 				keyFile = fileHistory.getKeyfileAt(position);
+				password=fileHistory.getPasswordAt(position);
 				return null;
 			}
 			
 			protected void onPostExecute(Void v) {
 				try {
-					PasswordActivity.Launch(FileSelectActivity.this, fileName, keyFile);
+					PasswordActivity.Launch(FileSelectActivity.this, fileName, keyFile,password);
 				}
 				catch (ContentFileNotFoundException e) {
 					Toast.makeText(FileSelectActivity.this, R.string.file_not_found_content, Toast.LENGTH_LONG)

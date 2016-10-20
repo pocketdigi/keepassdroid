@@ -66,7 +66,7 @@ public class LoadDB extends RunnableOnFinish {
         try {
             mDb.LoadData(mCtx, mUri, mPass, mKey, mStatus);
 
-            saveFileData(mUri, mKey);
+            saveFileData(mUri, mKey,mPass);
 
         } catch (ArcFourException e) {
             finish(false, mCtx.getString(R.string.error_arc4));
@@ -109,12 +109,12 @@ public class LoadDB extends RunnableOnFinish {
         finish(true);
     }
 
-    private void saveFileData(Uri uri, Uri key) {
+    private void saveFileData(Uri uri, Uri key,String password) {
         if ( ! mRememberKeyfile ) {
             key = null;
         }
 
-        App.getFileHistory().createFile(uri, key);
+        App.getFileHistory().createFile(uri, key,password);
     }
 
 

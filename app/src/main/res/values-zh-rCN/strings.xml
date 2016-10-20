@@ -163,7 +163,8 @@
     <string name="uppercase">大写</string>
     <string name="warning_read_only">你的SD卡目前是只读状态。您可能无法将更改保存到数据库。</string>
     <string name="warning_unmounted">你的SD卡目前尚未安装在您的设备上。你将无法加载或创建您的数据库。</string>
-    
+    <string name="fp_need_password">您从未使用密码打开过该数据库，不可以用指纹打开</string>
+
     <string-array name="clipboard_timeout_options">
     	<item>30秒</item>
     	<item>1分钟</item>

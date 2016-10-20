@@ -19,14 +19,17 @@
  */
 package com.keepassdroid;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -41,6 +44,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,14 +83,15 @@ public class PasswordActivity extends LockingActivity {
 
     private Uri mDbUri = null;
     private Uri mKeyUri = null;
+    private String mPassword=null;
     private boolean mRememberKeyfile;
     SharedPreferences prefs;
 
     public static void Launch(Activity act, String fileName) throws FileNotFoundException {
-        Launch(act,fileName,"");
+        Launch(act,fileName,"","");
     }
 
-    public static void Launch(Activity act, String fileName, String keyFile) throws FileNotFoundException {
+    public static void Launch(Activity act, String fileName, String keyFile,String password) throws FileNotFoundException {
         Uri uri = UriUtil.parseDefaultFile(fileName);
         String scheme = uri.getScheme();
 
@@ -100,6 +105,7 @@ public class PasswordActivity extends LockingActivity {
         Intent i = new Intent(act, PasswordActivity.class);
         i.putExtra(KEY_FILENAME, fileName);
         i.putExtra(KEY_KEYFILE, keyFile);
+        i.putExtra(KEY_PASSWORD, password);
 
         act.startActivityForResult(i, 0);
 
@@ -181,6 +187,7 @@ public class PasswordActivity extends LockingActivity {
 
         // Clear the shutdown flag
         App.clearShutdown();
+        fingerPrint();
     }
 
     private void retrieveSettings() {
@@ -194,7 +201,7 @@ public class PasswordActivity extends LockingActivity {
     private Uri getKeyFile(Uri dbUri) {
         if ( mRememberKeyfile ) {
 
-            return App.getFileHistory().getFileByName(dbUri);
+            return App.getFileHistory().getKeyFileByName(dbUri);
         } else {
             return null;
         }
@@ -347,7 +354,7 @@ public class PasswordActivity extends LockingActivity {
     }
 
     private class InitTask extends AsyncTask<Intent, Void, Integer> {
-        String password = "";
+//        String password = "";
         boolean launch_immediately = false;
 
         @Override
@@ -382,13 +389,13 @@ public class PasswordActivity extends LockingActivity {
                 else {
                     return R.string.error_can_not_handle_uri;
                 }
-                password = i.getStringExtra(KEY_PASSWORD);
+                mPassword = i.getStringExtra(KEY_PASSWORD);
                 launch_immediately = i.getBooleanExtra(KEY_LAUNCH_IMMEDIATELY, false);
 
             } else {
                 mDbUri = UriUtil.parseDefaultFile(i.getStringExtra(KEY_FILENAME));
                 mKeyUri = UriUtil.parseDefaultFile(i.getStringExtra(KEY_KEYFILE));
-                password = i.getStringExtra(KEY_PASSWORD);
+                mPassword = i.getStringExtra(KEY_PASSWORD);
                 launch_immediately = i.getBooleanExtra(KEY_LAUNCH_IMMEDIATELY, false);
 
                 if ( mKeyUri == null || mKeyUri.toString().length() == 0) {
@@ -427,10 +434,10 @@ public class PasswordActivity extends LockingActivity {
 
             });
 
-            if (password != null) {
-                TextView tv_password = (TextView) findViewById(R.id.password);
-                tv_password.setText(password);
-            }
+//            if (password != null) {
+//                TextView tv_password = (TextView) findViewById(R.id.password);
+//                tv_password.setText(password);
+//            }
 
             CheckBox defaultCheck = (CheckBox) findViewById(R.id.default_database);
             defaultCheck.setOnCheckedChangeListener(new DefaultCheckChange());
@@ -496,7 +503,42 @@ public class PasswordActivity extends LockingActivity {
             retrieveSettings();
 
             if (launch_immediately)
-                loadDatabase(password, mKeyUri);
+                loadDatabase(mPassword, mKeyUri);
+
         }
     }
+
+    public void fingerPrint() {
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M) {
+            FingerprintManager fingerprintManager = getSystemService(FingerprintManager.class);
+            ImageView imageViewFingerPrint= (ImageView) findViewById((R.id.imageViewFingerPrint));
+            FingerprintManager.AuthenticationCallback callback = new FingerprintManager.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
+                    //指纹验证成功
+                    Toast.makeText(PasswordActivity.this, "指纹验证成功", Toast.LENGTH_SHORT).show();
+                    loadDatabase(mPassword, mKeyUri);
+                }
+                @Override
+                public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    //指纹验证失败，不可再验
+                    Toast.makeText(PasswordActivity.this, "指纹验证失败，请使用密码解锁", Toast.LENGTH_SHORT).show();
+                }
+                @Override
+                public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
+                    //指纹验证失败，可再验，可能手指过脏，或者移动过快等原因。
+                    Toast.makeText(PasswordActivity.this, "请重刷指纹", Toast.LENGTH_SHORT).show();
+                }
+                @Override
+                public void onAuthenticationFailed() {
+                    //指纹验证失败，指纹识别失败，可再验，该指纹不是系统录入的指纹。
+                    Toast.makeText(PasswordActivity.this, "错误的指纹", Toast.LENGTH_SHORT).show();
+                }
+            };
+            if (fingerprintManager.isHardwareDetected() && fingerprintManager.hasEnrolledFingerprints()) {
+                fingerprintManager.authenticate(null, null, 0, callback, null);
+            }
+        }
+    }
+
 }

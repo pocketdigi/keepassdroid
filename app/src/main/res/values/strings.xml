@@ -193,6 +193,7 @@
     <string name="warning_password_encoding">The .kdb format only supports the Latin1 character set. Your password may contain characters outside of this character set. All non-Latin1 charaters are converted to the same character, which reduces the security of your password. Changing your password is recommended.</string>
     <string name="warning_read_only">Your sd card is currently read-only. You may not be able to save changes to your database.</string>
     <string name="warning_unmounted">Your sd card is not currently mounted on your device. You will not be able to load or create your database.</string>
+    <string name="fp_need_password">You Never open this database before,so you can not use fingerprint open it</string>
     <string name="version_label">Version:</string>
     
     <string-array name="clipboard_timeout_options">

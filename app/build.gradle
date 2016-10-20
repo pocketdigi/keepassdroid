@@ -2,13 +2,13 @@ apply plugin: 'com.android.model.application'
 
 model {
     android {
-        compileSdkVersion = 22
-        buildToolsVersion = "23.0.0"
+        compileSdkVersion = 25
+        buildToolsVersion = "23.0.3"
 
         defaultConfig.with {
             applicationId = "com.android.keepass"
-            minSdkVersion.apiLevel = 3
-            targetSdkVersion.apiLevel = 12
+            minSdkVersion.apiLevel = 16
+            targetSdkVersion.apiLevel = 23
             versionCode = 151
             versionName = "2.0.6.1"
 

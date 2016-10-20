@@ -24,6 +24,7 @@ import android.net.Uri;
 public class FileOnFinish extends OnFinish {
 	private Uri mFilename = null;
 	protected FileOnFinish mOnFinish;
+	private String mPassword;
 	
 	public FileOnFinish(FileOnFinish finish) {
 		super(finish);
@@ -33,6 +34,13 @@ public class FileOnFinish extends OnFinish {
 	
 	public void setFilename(Uri filename) {
 		mFilename = filename;
+	}
+
+	public void setPassword(String password) {
+		mPassword = password;
+	}
+	public String getPassword() {
+		return mPassword;
 	}
 	
 	public Uri getFilename() {
