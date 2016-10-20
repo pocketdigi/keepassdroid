@@ -1,7 +1,2 @@
-Native library build instructions:
-1. Make sure you have the latest MIPS Android NDK installed: 
-   https://developer.android.com/tools/sdk/ndk/index.html
-
-2. From KeePassDroid/app/src/main/jni, call prep_build.sh to download and unpack the crypto sources.
-
-3. The standard gradle files build everything now.
+#### KeePass指纹版
+KeePass是一个开源的密码管理软件，这个版本增加了指纹识别支持。当用户第一次使用密码打开数据库后，下次就可以使用指纹打开数据库。要求Android 6.0以上，硬件带指纹识别。
