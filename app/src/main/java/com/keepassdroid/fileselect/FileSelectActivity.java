@@ -19,15 +19,20 @@
  */
 package com.keepassdroid.fileselect;
 
+import android.Manifest;
 import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -78,7 +83,7 @@ public class FileSelectActivity extends ListActivity {
 	private RecentFileHistory fileHistory;
 
 	private boolean recentMode = false;
-
+	public static final int FINGERPRINT_REQUEST_CODE=1;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -101,7 +106,11 @@ public class FileSelectActivity extends ListActivity {
 						R.id.file_filename);
 
 				try {
-					PasswordActivity.Launch(FileSelectActivity.this, fileName);
+                    Uri dbUri = UriUtil.parseDefaultFile(fileName);
+                    Uri keyFileByName = fileHistory.getKeyFileByName(dbUri);
+                    String password = fileHistory.getPasswordByName(dbUri);
+                    String keyFilePath=keyFileByName==null?"":keyFileByName.toString();
+                    PasswordActivity.Launch(FileSelectActivity.this, fileName,keyFilePath,password);
 				}
 				catch (ContentFileNotFoundException e) {
 					Toast.makeText(FileSelectActivity.this,
@@ -252,7 +261,10 @@ public class FileSelectActivity extends ListActivity {
 
 				if (db.exists()) {
 					try {
-						PasswordActivity.Launch(FileSelectActivity.this, path);
+                        Uri keyFileByName = fileHistory.getKeyFileByName(dbUri);
+                        String password = fileHistory.getPasswordByName(dbUri);
+                        String keyFilePath=keyFileByName==null?"":keyFileByName.toString();
+						PasswordActivity.Launch(FileSelectActivity.this, path,keyFilePath,password);
 					} catch (Exception e) {
 						// Ignore exception
 					}

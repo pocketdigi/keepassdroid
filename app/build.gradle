@@ -71,6 +71,7 @@ model {
 
 dependencies {
     androidTestCompile files('libs/junit4.jar')
+    compile 'com.android.support:support-compat:25.0.0'
     // Set this dependency if you want to use Hamcrest matching
     //androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
 }
